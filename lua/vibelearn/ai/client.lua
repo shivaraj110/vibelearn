@@ -157,15 +157,34 @@ M.parse_task_response = function(response)
     return nil
   end
   
+  -- Handle table with raw text from parse_response
+  if type(response) == "table" and response.text then
+    response = response.text
+  end
+  
   if type(response) == "string" then
-    local ok, decoded = pcall(vim.json.decode, response)
-    if ok then
-      response = decoded
+    -- Try to extract JSON from the text
+    local json_match = response:match("%b{}")
+    if json_match then
+      local ok, decoded = pcall(vim.json.decode, json_match)
+      if ok then
+        response = decoded
+      else
+        return {
+          id = M.generate_task_id(),
+          title = "Generated Task",
+          description = response,
+          difficulty = 3,
+          created_at = os.time(),
+        }
+      end
     else
       return {
+        id = M.generate_task_id(),
         title = "Generated Task",
         description = response,
         difficulty = 3,
+        created_at = os.time(),
       }
     end
   end
