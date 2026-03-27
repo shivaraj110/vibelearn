@@ -3,14 +3,7 @@ local M = {}
 M.check = function()
   vim.health.start("VibeLearn")
   
-  M.check_neovim_version()
-  M.check_opencode()
-  M.check_dependencies()
-  M.check_data_directory()
-  M.check_configuration()
-end
-
-M.check_neovim_version = function()
+  -- Check Neovim version
   local version = vim.version()
   local major, minor = version.major, version.minor
   
@@ -20,9 +13,8 @@ M.check_neovim_version = function()
   else
     vim.health.ok("Neovim version: " .. tostring(vim.version()))
   end
-end
-
-M.check_opencode = function()
+  
+  -- Check OpenCode CLI
   local ok = vim.fn.system("which opencode 2>/dev/null")
   
   if ok == "" then
@@ -37,9 +29,8 @@ M.check_opencode = function()
       vim.health.info("OpenCode version: " .. version:gsub("\n", ""))
     end
   end
-end
-
-M.check_dependencies = function()
+  
+  -- Check dependencies
   local dependencies = {
     { name = "nui.nvim", module = "nui" },
     { name = "plenary.nvim", module = "plenary" },
@@ -54,9 +45,8 @@ M.check_dependencies = function()
       vim.health.ok(dep.name .. " installed")
     end
   end
-end
-
-M.check_data_directory = function()
+  
+  -- Check data directory
   local data_path = vim.fn.stdpath("data") .. "/vibelearn"
   
   if vim.fn.isdirectory(data_path) == 0 then
@@ -75,41 +65,46 @@ M.check_data_directory = function()
     local permissions = vim.fn.getfperm(data_path)
     vim.health.info("Permissions: " .. permissions)
   end
-end
-
-M.check_configuration = function()
-  local defaults_mod = require("vibelearn.config.defaults")
+  
+  -- Check configuration
+  local ok, defaults_mod = pcall(require, "vibelearn.config.defaults")
+  if not ok then
+    vim.health.error("VibeLearn configuration not loaded")
+    return
+  end
   
   vim.health.ok("VibeLearn configuration loaded")
   
   local user_config = defaults_mod.options or defaults_mod.defaults or {}
   
+  -- Check target languages
   if user_config.target_languages and #user_config.target_languages > 0 then
-    vim.health.ok("Target languages configured: " .. table.concat(user_config.target_languages, ", "))
+    vim.health.ok("Target languages: " .. table.concat(user_config.target_languages, ", "))
   else
-    vim.health.ok("No target languages configured (will auto-detect)")
-    vim.health.info("Set target_languages in your VibeLearn setup for personalized experience")
+    vim.health.info("No target languages configured (will auto-detect based on filetypes)")
+    vim.health.info("Set target_languages in your config for better experience")
   end
   
+  -- Check source language
   if user_config.source_language then
     vim.health.ok("Source language: " .. user_config.source_language)
+  else
+    vim.health.info("Source language: not configured (will use primary language)")
   end
   
+  -- Check OpenCode model
   if user_config.opencode and user_config.opencode.model then
     vim.health.ok("OpenCode model: " .. user_config.opencode.model)
   else
-    vim.health.ok("Using default OpenCode model")
+    vim.health.info("OpenCode: using default model")
   end
   
+  -- Check gamification
   if user_config.gamification and user_config.gamification.enabled then
-    vim.health.ok("Gamification enabled")
+    vim.health.ok("Gamification: enabled")
   else
-    vim.health.info("Gamification: " .. (user_config.gamification and "disabled" or "default"))
+    vim.health.info("Gamification: disabled or using defaults")
   end
-end
-
-M.run = function()
-  M.check()
 end
 
 return M
