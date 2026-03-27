@@ -17,12 +17,17 @@ M.init = function(data_path)
 end
 
 M.load_cache = function()
-  local files = M.tasks_dir:read()
-  if not files then
+  if not M.tasks_dir:exists() then
     return
   end
   
-  for _, file in ipairs(vim.split(files, "\n")) do
+  local dir_path = tostring(M.tasks_dir)
+  local files = vim.fn.readdir(dir_path)
+  if not files or #files == 0 then
+    return
+  end
+  
+  for _, file in ipairs(files) do
     if file:match("%.json$") then
       local task_file = M.tasks_dir:joinpath(file)
       local ok, content = pcall(task_file.read, task_file)
