@@ -42,26 +42,35 @@ M.query = function(prompt, context, callback)
     escaped_prompt
   )
   
+  log.debug("OpenCode command:", cmd)
+  
   M.request_count = M.request_count + 1
   M.last_request_time = os.time()
   
-  if callback then
-    M.query_async(cmd, callback)
-  else
-    local result = M.query_sync(cmd)
-    return result
-  end
-end
-
-M.query_sync = function(cmd)
+  -- Use synchronous query for simplicity
   local ok, result = pcall(vim.fn.system, cmd)
   
   if not ok then
     log.error("OpenCode query failed:", result)
+    if callback then
+      callback(nil, result)
+    end
     return nil
   end
   
-  return M.parse_response(result)
+  log.debug("OpenCode raw output:", result)
+  
+  local parsed = M.parse_response(result)
+  
+  if callback then
+    callback(parsed, nil)
+  end
+  
+  return parsed
+end
+
+M.query_sync = function(cmd)
+  return vim.fn.system(cmd)
 end
 
 M.query_async = function(cmd, callback)
