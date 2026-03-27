@@ -35,25 +35,19 @@ M.query = function(prompt, context, callback)
   
   local prompt_with_context = M.build_prompt(prompt, context)
   
-  local temp_file = vim.fn.tempname() .. ".txt"
-  vim.fn.writefile({ prompt_with_context }, temp_file)
-  
   local cmd = string.format(
-    "opencode chat --model '%s' --prompt '%s' --timeout '%d' < '%s'",
+    "opencode run --model '%s' --prompt '%s'",
     model,
-    prompt_with_context:gsub("'", "'\\''"),
-    timeout,
-    temp_file
+    prompt_with_context:gsub("'", "'\\''")
   )
   
   M.request_count = M.request_count + 1
   M.last_request_time = os.time()
   
   if callback then
-    M.query_async(cmd, callback, temp_file)
+    M.query_async(cmd, callback)
   else
     local result = M.query_sync(cmd)
-    vim.fn.delete(temp_file)
     return result
   end
 end
@@ -69,7 +63,7 @@ M.query_sync = function(cmd)
   return M.parse_response(result)
 end
 
-M.query_async = function(cmd, callback, temp_file)
+M.query_async = function(cmd, callback)
   vim.fn.jobstart(cmd, {
     on_stdout = function(_, data, _)
       local output = table.concat(data, "\n")
@@ -78,8 +72,6 @@ M.query_async = function(cmd, callback, temp_file)
       if callback then
         callback(result, nil)
       end
-      
-      vim.fn.delete(temp_file)
     end,
     on_stderr = function(_, data, _)
       local error_msg = table.concat(data, "\n")
@@ -88,8 +80,6 @@ M.query_async = function(cmd, callback, temp_file)
       if callback then
         callback(nil, error_msg)
       end
-      
-      vim.fn.delete(temp_file)
     end,
   })
 end
