@@ -11,8 +11,8 @@ M.current_task = nil
 M.config = nil
 
 M.open = function()
-  if M.layout then
-    M.layout:show()
+  if M.layout and vim.api.nvim_win_is_valid(M.layout) then
+    vim.api.nvim_set_current_win(M.layout)
     return
   end
   
