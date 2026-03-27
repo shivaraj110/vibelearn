@@ -112,8 +112,4 @@ M.run = function()
   M.check()
 end
 
-vim.api.nvim_create_user_command("VibeLearnHealth", function()
-  M.run()
-end, { desc = "Run VibeLearn health check" })
-
 return M

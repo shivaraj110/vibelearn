@@ -36,6 +36,10 @@ M.setup = function(opts)
     require("vibelearn.data.profiles").reset()
     vim.notify("VibeLearn data reset!", vim.log.levels.INFO)
   end, { desc = "Reset VibeLearn progress" })
+  
+  vim.api.nvim_create_user_command("VibeLearnHealth", function()
+    require("vibelearn.health").check()
+  end, { desc = "Run VibeLearn health check" })
 end
 
 return M
