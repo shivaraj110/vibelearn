@@ -35,10 +35,11 @@ M.query = function(prompt, context, callback)
   
   local prompt_with_context = M.build_prompt(prompt, context)
   
+  local escaped_prompt = prompt_with_context:gsub("'", "'\\''")
   local cmd = string.format(
-    "opencode run --model '%s' %s",
+    "opencode run --model '%s' '%s'",
     model,
-    vim.shellarg(prompt_with_context)
+    escaped_prompt
   )
   
   M.request_count = M.request_count + 1
