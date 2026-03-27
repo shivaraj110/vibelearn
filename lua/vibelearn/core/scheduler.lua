@@ -5,7 +5,6 @@ local analyzer = require("vibelearn.core.analyzer")
 local progress = require("vibelearn.data.progress")
 local ai_client = require("vibelearn.ai.client")
 local tasks = require("vibelearn.data.tasks")
-local dashboard = require("vibelearn.ui.dashboard")
 
 M.config = nil
 M.scheduled_task = nil
@@ -133,6 +132,7 @@ M.suggest_task = function(lang)
   local difficulty = M.determine_difficulty(assessment)
   local concepts = analyzer.get_recommended_concepts(lang, assessment.level)
   
+  local dashboard = require("vibelearn.ui.dashboard")
   dashboard.show_generating(lang)
   
   ai_client.generate_task(
