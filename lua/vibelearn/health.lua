@@ -78,33 +78,33 @@ M.check_data_directory = function()
 end
 
 M.check_configuration = function()
-  local ok, config = pcall(require, "vibelearn.config.defaults")
-  if not ok then
-    vim.health.error("VibeLearn configuration not loaded")
-    return
-  end
+  local defaults_mod = require("vibelearn.config.defaults")
   
   vim.health.ok("VibeLearn configuration loaded")
   
-  local defaults = config.defaults or config.get and config.get() or {}
+  local user_config = defaults_mod.options or defaults_mod.defaults or {}
   
-  if defaults.target_languages and #defaults.target_languages > 0 then
-    vim.health.ok("Target languages configured: " .. table.concat(defaults.target_languages, ", "))
+  if user_config.target_languages and #user_config.target_languages > 0 then
+    vim.health.ok("Target languages configured: " .. table.concat(user_config.target_languages, ", "))
   else
-    vim.health.warn("No target languages configured")
-    vim.health.info("Set target_languages in your VibeLearn setup")
+    vim.health.ok("No target languages configured (will auto-detect)")
+    vim.health.info("Set target_languages in your VibeLearn setup for personalized experience")
   end
   
-  if defaults.opencode and defaults.opencode.model then
-    vim.health.ok("OpenCode model: " .. defaults.opencode.model)
-  else
-    vim.health.info("Using default OpenCode model")
+  if user_config.source_language then
+    vim.health.ok("Source language: " .. user_config.source_language)
   end
   
-  if defaults.gamification and defaults.gamification.enabled then
+  if user_config.opencode and user_config.opencode.model then
+    vim.health.ok("OpenCode model: " .. user_config.opencode.model)
+  else
+    vim.health.ok("Using default OpenCode model")
+  end
+  
+  if user_config.gamification and user_config.gamification.enabled then
     vim.health.ok("Gamification enabled")
   else
-    vim.health.info("Gamification disabled")
+    vim.health.info("Gamification: " .. (user_config.gamification and "disabled" or "default"))
   end
 end
 
