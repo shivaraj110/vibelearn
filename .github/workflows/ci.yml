@@ -1,31 +1,35 @@
-name: CI
+name: Makefile CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ master ]
+    branches: [ "master" ]
 
 jobs:
-  test:
-    name: Test
+  build:
     runs-on: ubuntu-latest
+
+    env:
+      NVIM_VERSION: v0.9.5
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Install Neovim
-        uses: MunifTanjim/setup-neovim-action@v1
-      
-      - name: Install plenary
-        run: git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/lazy/plenary.nvim
-      
-      - name: Install nui
-        run: git clone --depth 1 https://github.com/MunifTanjim/nui.nvim ~/.local/share/nvim/lazy/nui.nvim
-      
-      - name: Link plugin
-        run: |
-          mkdir -p ~/.local/share/nvim/lazy
-          ln -s $(pwd) ~/.local/share/nvim/lazy/vibelearn
-      
-      - name: Plugin loads
-        run: nvim --headless -c "lua require('vibelearn').setup()" -c "qa"
+    - uses: actions/checkout@v4
+
+    - name: Install Neovim
+      run: |
+        wget -q https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz
+        tar xzf nvim-linux-x86_64.tar.gz
+        sudo mv nvim-linux-x86_64 /opt/nvim
+        sudo ln -s /opt/nvim/bin/nvim /usr/local/bin/nvim
+
+    - name: Install plenary.nvim
+      run: |
+        git clone --depth 1 https://github.com/nvim-lua/plenary.nvim.git ../plenary.nvim
+
+    - name: Install nui.nvim
+      run: |
+        git clone --depth 1 https://github.com/MunifTanjim/nui.nvim.git ../nui.nvim
+
+    - name: Verify plugin loads
+      run: nvim --headless -c "set rtp+=../plenary.nvim,../nui.nvim,." -c "lua require('vibelearn').setup()" -c "qa"

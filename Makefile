@@ -1,4 +1,4 @@
-.PHONY: test install clean
+.PHONY: test install clean pr_ready
 
 test:
 	nvim --headless -c "lua require('vibelearn').setup()" -c "qa"
@@ -13,3 +13,6 @@ clean:
 	rm -rf ~/.local/share/nvim/lazy/plenary.nvim 2>/dev/null || true
 	rm -rf ~/.local/share/nvim/lazy/nui.nvim 2>/dev/null || true
 	@echo "✓ Cleaned"
+
+pr_ready: test
+	@echo "✓ Ready for PR"
