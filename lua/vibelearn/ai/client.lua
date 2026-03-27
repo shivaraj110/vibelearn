@@ -31,8 +31,60 @@ M.query = function(prompt, context, callback)
   end
   
   local model = M.config.model or "opencode-go/minimax-m2.7"
-  local timeout = M.config.timeout_seconds or 30
   
+  local prompt_with_context = M.build_prompt(prompt, context)
+  
+  -- Use vim.ui.input for the prompt to avoid shell escaping issues
+  local cmd = { "opencode", "run", "--model", model, prompt_with_context }
+  
+  log.debug("OpenCode command:", vim.inspect(cmd))
+  
+  M.request_count = M.request_count + 1
+  M.last_request_time = os.time()
+  
+  -- Use jobstart for async execution
+  local output = {}
+  local job_id = vim.fn.jobstart(cmd, {
+    stdout = {
+      callback = function(_, data)
+        if data then
+          table.insert(output, data)
+        end
+      end,
+    },
+    stderr = {
+      callback = function(_, data)
+        if data then
+          table.insert(output, data)
+        end
+      end,
+    },
+    on_exit = function(_, exit_code)
+      local result = table.concat(output, "\n")
+      log.debug("OpenCode output:", result)
+      
+      local parsed = M.parse_response(result)
+      
+      if callback then
+        callback(parsed, nil)
+      end
+    end,
+  })
+  
+  if job_id == 0 or job_id == -1 then
+    log.error("Failed to start OpenCode job")
+    if callback then
+      callback(nil, "Failed to start OpenCode")
+    end
+  end
+end
+
+M.query_sync = function(prompt, context)
+  if not M.check_opencode_available() then
+    return nil
+  end
+  
+  local model = M.config.model or "opencode-go/minimax-m2.7"
   local prompt_with_context = M.build_prompt(prompt, context)
   
   local escaped_prompt = prompt_with_context:gsub("'", "'\\''")
@@ -42,56 +94,16 @@ M.query = function(prompt, context, callback)
     escaped_prompt
   )
   
-  log.debug("OpenCode command:", cmd)
+  log.debug("OpenCode sync command:", cmd)
   
-  M.request_count = M.request_count + 1
-  M.last_request_time = os.time()
-  
-  -- Use synchronous query for simplicity
   local ok, result = pcall(vim.fn.system, cmd)
   
   if not ok then
     log.error("OpenCode query failed:", result)
-    if callback then
-      callback(nil, result)
-    end
     return nil
   end
   
-  log.debug("OpenCode raw output:", result)
-  
-  local parsed = M.parse_response(result)
-  
-  if callback then
-    callback(parsed, nil)
-  end
-  
-  return parsed
-end
-
-M.query_sync = function(cmd)
-  return vim.fn.system(cmd)
-end
-
-M.query_async = function(cmd, callback)
-  vim.fn.jobstart(cmd, {
-    on_stdout = function(_, data, _)
-      local output = table.concat(data, "\n")
-      local result = M.parse_response(output)
-      
-      if callback then
-        callback(result, nil)
-      end
-    end,
-    on_stderr = function(_, data, _)
-      local error_msg = table.concat(data, "\n")
-      log.error("OpenCode error:", error_msg)
-      
-      if callback then
-        callback(nil, error_msg)
-      end
-    end,
-  })
+  return M.parse_response(result)
 end
 
 M.build_prompt = function(prompt_template, context)
