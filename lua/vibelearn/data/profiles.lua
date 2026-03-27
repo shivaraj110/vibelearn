@@ -31,7 +31,8 @@ local DEFAULT_PROFILE = {
   },
 }
 
-M.init = function(data_path)
+M.init = function(data_path, user_config)
+  user_config = user_config or {}
   M.profile_file = Path:new(data_path, "profile.json")
   
   -- Create data directory if it doesn't exist
@@ -43,6 +44,16 @@ M.init = function(data_path)
   end
   
   M.profile = M.load()
+  
+  -- Merge user config into profile
+  if user_config.target_languages and #user_config.target_languages > 0 then
+    M.profile.user.target_languages = user_config.target_languages
+  end
+  if user_config.source_language then
+    M.profile.user.primary_language = user_config.source_language
+  end
+  
+  M.save()
   log.debug("Profile initialized", M.profile)
 end
 

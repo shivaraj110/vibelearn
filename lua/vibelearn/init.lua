@@ -10,8 +10,8 @@ local scheduler = require("vibelearn.core.scheduler")
 M.setup = function(opts)
   local cfg = config.setup(opts)
   
-  -- Initialize data modulesfirst
-  profiles.init(cfg.storage.data_path)
+  -- Initialize data modules first
+  profiles.init(cfg.storage.data_path, cfg)
   progress.init(cfg.storage.data_path)
   history.init(cfg.storage.data_path)
   tasks.init(cfg.storage.data_path)
