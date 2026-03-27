@@ -1,0 +1,44 @@
+# Lua
+*.luarc.json
+*.lua.bak
+
+# Neovim
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# Plugin data
+/data/
+*.json.bak
+
+# Testing
+/tests/tmp/
+/test_results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.sublime-*
+
+# Build
+/dist/
+/build/
+
+# Logs
+*.log
+/logs/
+
+# Temporary files
+/tmp/
+*.tmp
+*.temp
+
+# Environment
+.env
+.env.local
