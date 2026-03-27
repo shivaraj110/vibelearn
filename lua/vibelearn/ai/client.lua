@@ -31,52 +31,39 @@ M.query = function(prompt, context, callback)
   end
   
   local model = M.config.model or "opencode-go/minimax-m2.7"
-  
   local prompt_with_context = M.build_prompt(prompt, context)
+  local escaped_prompt = prompt_with_context:gsub("'", "'\\''")
   
-  -- Use vim.ui.input for the prompt to avoid shell escaping issues
-  local cmd = { "opencode", "run", "--model", model, prompt_with_context }
+  local cmd = string.format(
+    "opencode run --model '%s' '%s'",
+    model,
+    escaped_prompt
+  )
   
-  log.debug("OpenCode command:", vim.inspect(cmd))
+  log.debug("OpenCode command:", cmd)
   
   M.request_count = M.request_count + 1
   M.last_request_time = os.time()
   
-  -- Use jobstart for async execution
-  local output = {}
-  local job_id = vim.fn.jobstart(cmd, {
-    stdout = {
-      callback = function(_, data)
-        if data then
-          table.insert(output, data)
-        end
-      end,
-    },
-    stderr = {
-      callback = function(_, data)
-        if data then
-          table.insert(output, data)
-        end
-      end,
-    },
-    on_exit = function(_, exit_code)
-      local result = table.concat(output, "\n")
-      log.debug("OpenCode output:", result)
-      
-      local parsed = M.parse_response(result)
-      
+  -- Run in deferred function to not block UI
+  vim.defer_fn(function()
+    local ok, result = pcall(vim.fn.system, cmd)
+    
+    if not ok then
+      log.error("OpenCode query failed:", result)
       if callback then
-        callback(parsed, nil)
+        callback(nil, result)
       end
-    end,
-  })
-  
-  if job_id == 0 or job_id == -1 then
-    log.error("Failed to start OpenCode job")
-    if callback then
-      callback(nil, "Failed to start OpenCode")
+      return
     end
-  end
+    
+    log.debug("OpenCode output:", result)
+    local parsed = M.parse_response(result)
+    
+    if callback then
+      callback(parsed, nil)
+    end
+  end, 1)
 end
 
 M.query_sync = function(prompt, context)
