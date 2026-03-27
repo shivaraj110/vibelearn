@@ -3,5 +3,5 @@ if exists('g:loaded_vibelearn')
 endif
 let g:loaded_vibelearn = 1
 
-" This file is intentionally minimal - all logic is in Lua
-" The plugin will be loaded lazily by the user's plugin manager
+" Commands are registered in lua/vibelearn/init.lua setup()
+" This file ensures the plugin is loaded lazily

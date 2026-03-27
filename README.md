@@ -35,8 +35,9 @@ VibeLearn is a Neovim plugin that helps you transition from one programming lang
 
 ## Requirements
 
-- **Neovim** >= 0.9.0
-- **OpenCode CLI** installed and configured
+- **Neovim** >= 0.9.0 (tested withv0.11.6)
+- **Git**
+- **OpenCode CLI** (for AI features)
 - **Required plugins** (automatically installed):
   - [nui.nvim](https://github.com/MunifTanjim/nui.nvim)
   - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
@@ -47,13 +48,15 @@ VibeLearn is a Neovim plugin that helps you transition from one programming lang
 
 ```lua
 {
-  "shivaraj/vibelearn",
+  "shivaraj110/vibelearn",
   dependencies = {
     "MunifTanjim/nui.nvim",
     "nvim-lua/plenary.nvim",
   },
   config = function()
-    require("vibelearn").setup()
+    require("vibelearn").setup({
+      -- Your configuration here (optional)
+    })
   end,
 }
 ```
@@ -62,7 +65,7 @@ VibeLearn is a Neovim plugin that helps you transition from one programming lang
 
 ```lua
 use {
-  "shivaraj/vibelearn",
+  "shivaraj110/vibelearn",
   requires = {
     "MunifTanjim/nui.nvim",
     "nvim-lua/plenary.nvim",
@@ -75,14 +78,11 @@ use {
 
 ## Quick Start
 
-1. **Install the plugin** using your preferred plugin manager
+1. **Install the plugin** using your plugin manager
 
-2. **Configure OpenCode CLI**:
+2. **Install OpenCode CLI** (required for AI features):
    ```bash
-   # Install OpenCode CLI
    # See: https://github.com/opencode/opencode
-   
-   # Verify installation
    opencode --version
    ```
 
@@ -92,11 +92,15 @@ use {
    ```
    This opens the interactive dashboard.
 
-4. **Set your learning goals**:
+4. **Get a learning task**:
    ```vim
    :VibeLearnTask
    ```
-   Get personalized learning tasks.
+
+5. **Check health**:
+   ```vim
+   :VibeLearnHealth
+   ```
 
 ## Configuration
 
@@ -120,13 +124,14 @@ require("vibelearn").setup({
     show_notifications = true,
     celebrate_achievements = true,
     streak_reminders = true,
+    xp_multiplier = 1.0,
   },
   
   -- OpenCode Settings
   opencode = {
     model = "opencode-go/minimax-m2.7",
     context_lines = 100,
-    timeout_seconds =30,
+    timeout_seconds = 30,
   },
   
   -- Dashboard UI
@@ -135,6 +140,20 @@ require("vibelearn").setup({
     width = 60,
     height = 80,
     border = "rounded",
+  },
+  
+  -- Tracking
+  tracking = {
+    filetypes = { enabled = true, min_time_seconds = 30 },
+    lsp = { enabled = true, track_errors = true, track_warnings = true },
+    git = { enabled = true, commit_analysis = true },
+  },
+  
+  -- Storage
+  storage = {
+    data_path = vim.fn.stdpath("data") .. "/vibelearn",
+    backup_enabled = true,
+    max_history_days = 30,
   },
 })
 ```
@@ -147,19 +166,22 @@ require("vibelearn").setup({
 | `:VibeLearnTask` | Get a new learning task |
 | `:VibeLearnStats` | View your statistics |
 | `:VibeLearnReset` | Reset all progress |
+| `:VibeLearnHealth` | Run health check |
 
 ## Keymaps
 
 Default keymaps (configurable):
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader>vl` | Normal | Open VibeLearn dashboard |
-| `<leader>vs` | Normal | Start a new task |
-| `q` | Dashboard | Close dashboard |
-| `<CR>` | Dashboard | Start selected task |
-| `s` | Dashboard | Skip current task |
-| `r` | Dashboard | Refresh dashboard |
+```lua
+vim.keymap.set("n", "<leader>vl", "<cmd>VibeLearn<cr>", { desc = "Open VibeLearn Dashboard" })
+vim.keymap.set("n", "<leader>vs", "<cmd>VibeLearnTask<cr>", { desc = "Start a Task" })
+```
+
+Dashboard keymaps:
+- `q` - Close dashboard
+- `<CR>` - Start selected task
+- `s` - Skip current task
+- `r` - Refresh dashboard
 
 ## How It Works
 
@@ -197,6 +219,30 @@ VibeLearn stores data locally in:
 └── tasks/            # Task cache & history
 ```
 
+## Dashboard Preview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ VibeLearn Dashboard                          [<Close>] │
+├─────────────────────────────────────────────────────────┤
+│ Current: Python → Rust                                  │
+│ Proficiency: Beginner (23% complete)                   │
+├─────────────────────────────────────────────────────────┤
+│ 📊 Activity Stats                                       │
+│ ┌───────────────┬───────────────┬───────────────┐    │
+│ │ Python: 45h   │ JavaScript: 12h│ Rust: 2h      │    │
+│ └───────────────┴───────────────┴───────────────┘    │
+├─────────────────────────────────────────────────────────┤
+│ 🎯 Today's Tasks                                        │
+│ 1. [Rust] Create a simple struct with methods         │
+│    Difficulty: ★☆☆☆☆                                  │
+│    [Start Task] [Skip]                                 │
+├─────────────────────────────────────────────────────────┤
+│ 📈 Progress Timeline                                    │
+│ Week 1: ######░░░░ 60% | Week 2: ########░░ 80%      │
+└─────────────────────────────────────────────────────────┘
+```
+
 ## Roadmap
 
 - [ ] Interactive code exercises
@@ -216,6 +262,23 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/shivaraj110/vibelearn.git
+cd vibelearn
+
+# Run tests
+make test
+
+# Run linting
+make lint
+
+# Install dependencies locally
+make install
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
@@ -223,7 +286,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Credits
 
 Created by **Shivaraj**
-- GitHub: [@shivaraj](https://github.com/shivaraj)
+- GitHub: [@shivaraj110](https://github.com/shivaraj110)
 
 Built with:
 - [Neovim](https://neovim.io/)
@@ -236,5 +299,5 @@ Built with:
 If you find this plugin helpful, consider giving it a ⭐ on GitHub!
 
 For issues, questions, or suggestions:
-- [GitHub Issues](https://github.com/shivaraj/vibelearn/issues)
-- [GitHub Discussions](https://github.com/shivaraj/vibelearn/discussions)
+- [GitHubIssues](https://github.com/shivaraj110/vibelearn/issues)
+- [GitHub Discussions](https://github.com/shivaraj110/vibelearn/discussions)

@@ -78,7 +78,7 @@ M.check_data_directory = function()
 end
 
 M.check_configuration = function()
-  local ok, config = pcall(require, "vibelearn.config")
+  local ok, config = pcall(require, "vibelearn.config.defaults")
   if not ok then
     vim.health.error("VibeLearn configuration not loaded")
     return
