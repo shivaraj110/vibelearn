@@ -222,25 +222,62 @@ VibeLearn stores data locally in:
 ## Dashboard Preview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ VibeLearn Dashboard                          [<Close>] │
-├─────────────────────────────────────────────────────────┤
-│ Current: Python → Rust                                  │
-│ Proficiency: Beginner (23% complete)                   │
-├─────────────────────────────────────────────────────────┤
-│ 📊 Activity Stats                                       │
-│ ┌───────────────┬───────────────┬───────────────┐    │
-│ │ Python: 45h   │ JavaScript: 12h│ Rust: 2h      │    │
-│ └───────────────┴───────────────┴───────────────┘    │
-├─────────────────────────────────────────────────────────┤
-│ 🎯 Today's Tasks                                        │
-│ 1. [Rust] Create a simple struct with methods         │
-│    Difficulty: ★☆☆☆☆                                  │
-│    [Start Task] [Skip]                                 │
-├─────────────────────────────────────────────────────────┤
-│ 📈 Progress Timeline                                    │
-│ Week 1: ######░░░░ 60% | Week 2: ########░░ 80%      │
-└─────────────────────────────────────────────────────────┘
+╔════════════════════════════════════════════════════════════╗
+║                    VibeLearn Dashboard                      ║
+╠════════════════════════════════════════════════════════════╣
+
+  Welcome, Developer
+
+  Learning: rust, go, typescript
+  Streak: 3 days (longest: 7)
+
+╠════════════════════════════════════════════════════════════╣
+║                      Progress                               ║
+╠════════════════════════════════════════════════════════════╣
+
+  Level: 5
+  XP: 1250
+  Tasks Completed: 42
+  Languages: 3
+  Time: 12.5 hours
+
+╠════════════════════════════════════════════════════════════╣
+║                      Actions                                 ║
+╠════════════════════════════════════════════════════════════╣
+
+  [t] Get new task
+  [s] View statistics
+  [r] Refresh dashboard
+  [q] Close
+
+╚════════════════════════════════════════════════════════════╝
+```
+
+**Task Display:**
+```
+╔════════════════════════════════════════════════════════════╗
+║ Create a simple struct with methods                          ║
+╠════════════════════════════════════════════════════════════╣
+
+  Language: Rust
+  Difficulty: ★★☆☆☆
+  Time: 15 minutes
+
+  Description:
+    Learn Rust's struct syntax and method implementation
+    by creating a basic Rectangle struct.
+
+  Concepts:
+    - Struct definition
+    - Method syntax
+    - Self keyword
+
+╠════════════════════════════════════════════════════════════╣
+  [Enter] Start Task
+  [h] View Hints
+  [s] Skip Task
+  [q] Close
+╚════════════════════════════════════════════════════════════╝
 ```
 
 ## Roadmap
