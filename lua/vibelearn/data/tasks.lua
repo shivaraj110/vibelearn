@@ -57,7 +57,7 @@ M.save_task = function(task)
     return false
   end
   
-  local ok2 = pcall(task_file.write, task_file, encoded)
+  local ok2 = pcall(task_file.write, task_file, encoded, "w")
   if not ok2 then
     log.error("Failed to write task file", task.id)
     return false
