@@ -6,6 +6,7 @@ local history = require("vibelearn.data.history")
 local tasks = require("vibelearn.data.tasks")
 local tracker = require("vibelearn.core.tracker")
 local scheduler = require("vibelearn.core.scheduler")
+local ai_client = require("vibelearn.ai.client")
 
 M.setup = function(opts)
   local cfg = config.setup(opts)
@@ -17,6 +18,7 @@ M.setup = function(opts)
   tasks.init(cfg.storage.data_path)
   
   -- Initialize core modules
+  ai_client.init(cfg)
   tracker.init(cfg)
   scheduler.init(cfg)
   
