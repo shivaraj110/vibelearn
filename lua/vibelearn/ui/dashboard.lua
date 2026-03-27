@@ -226,6 +226,58 @@ M.open_task = function(task)
   vim.keymap.set("n", "q", function()
     vim.api.nvim_win_close(win, false)
   end, { buffer = buf, noremap = true })
+  
+  M.current_win = win
+  M.current_buf = buf
+end
+
+M.show_generating = function(language)
+  local lines = {}
+  table.insert(lines, "╔════════════════════════════════════════════════════════════╗")
+  table.insert(lines, "║                  VibeLearn                                  ║")
+  table.insert(lines, "╠════════════════════════════════════════════════════════════╣")
+  table.insert(lines, "")
+  table.insert(lines, string.format("  Building your task for %s...", language or "Rust"))
+  table.insert(lines, "")
+  table.insert(lines, "  Please wait while AI crafts a personalized learning task...")
+  table.insert(lines, "")
+  table.insert(lines, "║                                                                ║")
+  table.insert(lines, "  [q] Cancel")
+  table.insert(lines, "╚════════════════════════════════════════════════════════════╝")
+  
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(buf, "modifiable", false)
+  vim.api.nvim_buf_set_option(buf, "filetype", "vibelearn-generating")
+  
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = 60,
+    height = 10,
+    row = 10,
+    col = 10,
+    style = "minimal",
+    border = "rounded",
+    title = " VibeLearn ",
+    title_pos = "center",
+  })
+  
+  vim.keymap.set("n", "q", function()
+    vim.api.nvim_win_close(win, false)
+  end, { buffer = buf, noremap = true })
+  
+  M.current_win = win
+  M.current_buf = buf
+  
+  return win
+end
+
+M.close_generating = function()
+  if M.current_win and vim.api.nvim_win_is_valid(M.current_win) then
+    vim.api.nvim_win_close(M.current_win, false)
+  end
+  M.current_win = nil
+  M.current_buf = nil
 end
 
 return M

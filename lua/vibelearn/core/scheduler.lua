@@ -5,6 +5,7 @@ local analyzer = require("vibelearn.core.analyzer")
 local progress = require("vibelearn.data.progress")
 local ai_client = require("vibelearn.ai.client")
 local tasks = require("vibelearn.data.tasks")
+local dashboard = require("vibelearn.ui.dashboard")
 
 M.config = nil
 M.scheduled_task = nil
@@ -132,7 +133,7 @@ M.suggest_task = function(lang)
   local difficulty = M.determine_difficulty(assessment)
   local concepts = analyzer.get_recommended_concepts(lang, assessment.level)
   
-  vim.notify("Generating a learning task for " .. lang .. "...", vim.log.levels.INFO)
+  dashboard.show_generating(lang)
   
   ai_client.generate_task(
     M.get_source_language(),
@@ -140,6 +141,8 @@ M.suggest_task = function(lang)
     difficulty,
     concepts,
     function(task, err)
+      dashboard.close_generating()
+      
       if err then
         log.error("Failed to generate task:", err)
         vim.notify("Failed to generate task. Please check your OpenCode setup.", vim.log.levels.ERROR)
