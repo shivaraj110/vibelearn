@@ -33,6 +33,15 @@ local DEFAULT_PROFILE = {
 
 M.init = function(data_path)
   M.profile_file = Path:new(data_path, "profile.json")
+  
+  -- Create data directory if it doesn't exist
+  if not M.profile_file:exists() then
+    local data_dir = Path:new(data_path)
+    if not data_dir:exists() then
+      data_dir:mkdir({ parents = true })
+    end
+  end
+  
   M.profile = M.load()
   log.debug("Profile initialized", M.profile)
 end

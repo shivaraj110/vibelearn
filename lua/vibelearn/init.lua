@@ -1,5 +1,5 @@
 local M = {}
-local config = require("vibelearn.config")
+local config = require("vibelearn.config.defaults")
 local profiles = require("vibelearn.data.profiles")
 local progress = require("vibelearn.data.progress")
 local tracker = require("vibelearn.core.tracker")

@@ -41,6 +41,15 @@ local XP_VALUES = {
 
 M.init = function(data_path)
   M.progress_file = Path:new(data_path, "progress.json")
+  
+  -- Create data directory if it doesn't exist
+  if not M.progress_file:exists() then
+    local data_dir = Path:new(data_path)
+    if not data_dir:exists() then
+      data_dir:mkdir({ parents = true })
+    end
+  end
+  
   M.progress = M.load()
 end
 

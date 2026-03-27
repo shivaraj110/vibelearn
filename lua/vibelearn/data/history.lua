@@ -7,6 +7,15 @@ M.history = nil
 
 M.init = function(data_path)
   M.history_file = Path:new(data_path, "history.json")
+  
+  -- Create data directory if it doesn't exist
+  if not M.history_file:exists() then
+    local data_dir = Path:new(data_path)
+    if not data_dir:exists() then
+      data_dir:mkdir({ parents = true })
+    end
+  end
+  
   M.history = M.load()
 end
 
