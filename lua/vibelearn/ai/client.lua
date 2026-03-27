@@ -111,9 +111,9 @@ M.parse_response = function(raw)
     return nil
   end
   
-  local decoded = vim.json.decode(raw)
+  local ok, decoded = pcall(vim.json.decode, raw)
   
-  if decoded then
+  if ok and decoded then
     return decoded
   end
   
