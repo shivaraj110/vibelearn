@@ -2,14 +2,21 @@ local M = {}
 local config = require("vibelearn.config.defaults")
 local profiles = require("vibelearn.data.profiles")
 local progress = require("vibelearn.data.progress")
+local history = require("vibelearn.data.history")
+local tasks = require("vibelearn.data.tasks")
 local tracker = require("vibelearn.core.tracker")
 local scheduler = require("vibelearn.core.scheduler")
 
 M.setup = function(opts)
   local cfg = config.setup(opts)
   
+  -- Initialize data modulesfirst
   profiles.init(cfg.storage.data_path)
   progress.init(cfg.storage.data_path)
+  history.init(cfg.storage.data_path)
+  tasks.init(cfg.storage.data_path)
+  
+  -- Initialize core modules
   tracker.init(cfg)
   scheduler.init(cfg)
   
