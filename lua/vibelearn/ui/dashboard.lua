@@ -168,7 +168,10 @@ M.open_task = function(task)
   table.insert(lines, string.format("  Time: %s", task.estimated_time or "15 minutes"))
   table.insert(lines, "")
   table.insert(lines, "  Description:")
-  table.insert(lines, string.format("    %s", task.description or "No description"))
+  local desc = task.description or "No description"
+  for line in desc:gmatch("[^\r\n]+") do
+    table.insert(lines, string.format("    %s", line))
+  end
   table.insert(lines, "")
   
   if task.concepts and #task.concepts > 0 then
