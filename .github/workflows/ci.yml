@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Neovim
+        uses: rhysd/action-setup-nvim@v1
+        with:
+          neovim-version: stable
+      
+      - name: Install plenary
+        run: git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/lazy/plenary.nvim
+      
+      - name: Install nui
+        run: git clone --depth 1 https://github.com/MunifTanjim/nui.nvim ~/.local/share/nvim/lazy/nui.nvim
+      
+      - name: Link plugin
+        run: |
+          mkdir -p ~/.local/share/nvim/lazy
+          ln -s $(pwd) ~/.local/share/nvim/lazy/vibelearn
+      
+      - name: Plugin loads
+        run: nvim --headless -c "lua require('vibelearn').setup()" -c "qa"
