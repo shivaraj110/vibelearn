@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      NVIM_VERSION: v0.9.5
+      NVIM_VERSION: v0.11.6
 
     steps:
     - uses: actions/checkout@v4
