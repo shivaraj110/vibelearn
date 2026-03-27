@@ -91,4 +91,173 @@ M.generate_id = function()
   end)
 end
 
+M.create_task = function(task_data)
+  local task = vim.tbl_deep_extend("force", {
+    id = M.generate_id(),
+    created_at = os.time(),
+    status = "pending",
+    attempts = 0,
+    hints_used = 0,
+    time_spent = 0,
+  }, task_data or {})
+  
+  M.save_task(task)
+  return task
+end
+
+M.start_task = function(task_id)
+  local task = M.get_task(task_id)
+  if not task then
+    log.error("Task not found:", task_id)
+    return false
+  end
+  
+  task.status = "in_progress"
+  task.started_at = os.time()
+  task.attempts = (task.attempts or 0) + 1
+  
+  M.save_task(task)
+  M.active_task = task
+  
+  log.info("Task started:", task.title or task_id)
+  return true
+end
+
+M.get_active_task = function()
+  return M.active_task
+end
+
+M.set_active_task = function(task_id)
+  local task = M.get_task(task_id)
+  if task then
+    M.active_task = task
+    log.info("Active task set:", task.title or task_id)
+    return true
+  end
+  return false
+end
+
+M.mark_completed = function(task_id, solution, is_perfect)
+  local task = M.get_task(task_id)
+  if not task then
+    return false
+  end
+  
+  task.status = "completed"
+  task.completed_at = os.time()
+  task.solution = solution
+  task.is_perfect = is_perfect or false
+  
+  M.save_task(task)
+  
+  local progress = require("vibelearn.data.progress")
+  progress.record_task_completion(
+    task.language,
+    M.difficulty_to_name(task.difficulty),
+    task.time_spent,
+    is_perfect
+  )
+  
+  if M.active_task and M.active_task.id == task_id then
+    M.active_task = nil
+  end
+  
+  log.info("Task completed:", task.title or task_id)
+  return true
+end
+
+M.mark_skipped = function(task_id, reason)
+  local task = M.get_task(task_id)
+  if not task then
+    return false
+  end
+  
+  task.status = "skipped"
+  task.skipped_at = os.time()
+  task.skip_reason = reason
+  
+  M.save_task(task)
+  
+  if M.active_task and M.active_task.id == task_id then
+    M.active_task = nil
+  end
+  
+  log.info("Task skipped:", task.title or task_id)
+  return true
+end
+
+M.difficulty_to_name = function(difficulty)
+  local names = {
+    [1] = "easy",
+    [2] = "easy",
+    [3] = "medium",
+    [4] = "hard",
+    [5] = "hard",
+  }
+  return names[difficulty] or "medium"
+end
+
+M.use_hint = function(task_id)
+  local task = M.get_task(task_id)
+  if not task or not task.hints then
+    return nil
+  end
+  
+  local hint_number = (task.hints_used or 0) + 1
+  if hint_number > #task.hints then
+    return nil
+  end
+  
+  task.hints_used = hint_number
+  M.save_task(task)
+  
+  return task.hints[hint_number]
+end
+
+M.clear_active_task = function()
+  M.active_task = nil
+end
+
+M.get_statistics = function(lang)
+  local stats = {
+    total = 0,
+    completed = 0,
+    skipped = 0,
+    in_progress = 0,
+    pending = 0,
+    average_difficulty = 0,
+    average_time = 0,
+    completion_rate = 0,
+  }
+  
+  local total_difficulty = 0
+  local total_time = 0
+  
+  for _, task in pairs(M.task_cache) do
+    if not lang or task.language == lang then
+      stats.total = stats.total + 1
+      total_difficulty = total_difficulty + (task.difficulty or 0)
+      total_time = total_time + (task.time_spent or 0)
+      
+      if task.status == "completed" then
+        stats.completed = stats.completed + 1
+      elseif task.status == "skipped" then
+        stats.skipped = stats.skipped + 1
+      elseif task.status == "in_progress" then
+        stats.in_progress = stats.in_progress + 1
+      else
+        stats.pending = stats.pending + 1
+      end
+    end
+  end
+  
+  if stats.total > 0 then
+    stats.average_difficulty = total_difficulty / stats.total
+    stats.average_time = total_time / stats.total
+    stats.completion_rate = (stats.completed / stats.total) *100
+  end
+  
+  return stats
+end
+
 return M
